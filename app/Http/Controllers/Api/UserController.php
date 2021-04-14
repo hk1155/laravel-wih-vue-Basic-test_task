@@ -13,11 +13,10 @@ class UserController extends Controller
 {
     public function checklogin(Request $request)
     {
-        // print_r($request->all());
-        // die;
-        $credentials = $request->only('email', 'password');
-
-        if (Auth::attempt($credentials)) {
+        // $credentials = $request->only('email', 'password');
+        $email=$request->email;
+        $password=$request->password;
+        if (Auth::attempt(['email' => $email, 'password' => $password, 'role' => 'user'])) {
 
             return response()->json(['success'=>1,'message'=>'You are Login successfully','token'=>$request->bearerToken()]);
             // return redirect()->intended('dashboard');
@@ -30,13 +29,8 @@ class UserController extends Controller
 
     public function profile(Request $request)
     {
-        // print_r($request->all());
-        // die;
-
-        // $validated = $request->validate([
-        //     'username' => 'required|max:20|min:4',
-
-        // ]);
+        // $id = Auth::id(); // profile updatation by login user only.
+        $id=3;
         $validator = Validator::make($request->all(), [
             'username' => 'required|max:20|min:4',
         ]);
@@ -45,22 +39,34 @@ class UserController extends Controller
             return response()->json(['result' => '0', "message" => "Validation error", 'errors' => $validator->errors()->messages()]);
         }
 
-        $image       = $request->file('avtar');
-        $filename    = $image->getClientOriginalName();
+        $image = $request->file('avtar');
+        $filename= $image->getClientOriginalName();
         $image_resize = Image::make($image->getRealPath());
         $image_resize->resize(256, 256);
         $image_resize->save(public_path('uploads/' .$filename));
-        $imagepath = public_path().'/uploads/';
-
-        // $avtar=$request->avtar;
-        // $flyername = strtolower(time().$avtar->getClientOriginalName());
-        // $flyerpath = public_path().'/uploads/';
-        // $avtar = Image::make($avtar->getRealPath());
-        // $avtar->resize(256,256);
-        // $avtar->move($flyerpath, $flyername);
+        $imagepath = '/uploads/'.$filename;
 
 
-        print_r($image_resize);
-        die;
+        $name=$request->name;
+        $username=$request->username;
+
+        $data=User::where('id', $id)
+       ->update([
+           'name' => $name,
+           'username'=>$username,
+            'avtar'=>$imagepath
+        ]);
+
+        if($data==true)
+        {
+            return response()->json(['result' => '1', "message" => "Profile Update successfully"]);
+        }
+        else
+        {
+            return response()->json(['result' => '0', "message" => "Something went wrong please try again later."]);
+        }
+
+
+
     }
 }

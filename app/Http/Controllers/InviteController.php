@@ -13,9 +13,9 @@ class InviteController extends Controller
 {
     public function invite(Request $request)
     {
+        // print_r($request->all());
+        // die;
         $email = $request->email;
-
-
         $code = rand(1000,9999);
         // $code=base64_encode($code);
         $link = "http://localhost:8000/api/invitation?code=$code";
@@ -25,10 +25,8 @@ class InviteController extends Controller
             $request->to($email)->subject('Invitation Link');
             });
 
-        // \Mail::send ( 'template', $data, function ($sendemail) use($email) {
-        //     $sendemail->from ( 'info@me.com', 'Me Team' );
-        //     $sendemail->to ( $email, '' )->subject ( 'Activate your account' );
-        // } );
+            // return view('invitation', ['msg' => 'Link Sent Successfully']);
+        return response()->json(['msg'=>'Link Sent Successfully']);
     }
 
     public function check(Request $request)
@@ -66,8 +64,6 @@ class InviteController extends Controller
 
     public function verify(Request $request,$id)
     {
-        // print_r($id);
-        // die;
         $up=User::where('id', $id)
         ->update(['verified' => 1]);
 
